@@ -1,0 +1,1 @@
+web: gunicorn westerholt-cinema.wsgi --log-file -
