@@ -1,9 +1,11 @@
 from django.shortcuts import render
+from rest_framework import status
 from django.http import JsonResponse
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, APIView, authentication_classes, permission_classes
 from rest_framework.response import Response
-from .serializers import MovieSerializer, GenreSerializer
-from .models import Movie, Genre
+from rest_framework.permissions import AllowAny
+from .serializers import MovieSerializer, GenreSerializer, RegistrationSerializer, LoginSerializer, UserSerializer
+from .models import Movie, Genre, User
 
 @api_view(['GET'])
 def apiOverview(request):
@@ -12,83 +14,136 @@ def apiOverview(request):
   }
 
   return Response(api_urls)
+# -----------------------USERS-----------------------
+
+class UsersAPIView(APIView):
+  authentication_classes = [AllowAny]
+
+  @api_view(['GET'])
+  def show(request, id):
+    user = User.objects.get(id = id)
+    serializer = UserSerializer(user, many=False)
+    return Response(serializer.data)
 
 # ---------------------- MOVIES ---------------------
+class MoviesAPIView(APIView):
+  @api_view(['GET'])
+  def index(request):
+    movies = Movie.objects.all()
+    serializer = MovieSerializer(movies, many=True)
+    return Response(serializer.data)
 
-@api_view(['GET'])
-def movieList(request):
-  movies = Movie.objects.all()
-  serializer = MovieSerializer(movies, many=True)
-  return Response(serializer.data)
+  @api_view(['GET'])
+  def show(request, id):
+    movie = Movie.objects.get(id = id)
+    serializer = MovieSerializer(movie, many=False)
+    return Response(serializer.data)
 
-@api_view(['GET'])
-def movieDetail(request, id):
-  movie = Movie.objects.get(id = id)
-  serializer = MovieSerializer(movie, many=False)
-  return Response(serializer.data)
+  @api_view(['POST'])
+  def create(request):
+    serializer = MovieSerializer(data = request.data)
 
-@api_view(['POST'])
-def movieCreate(request):
-  serializer = MovieSerializer(data = request.data)
+    if serializer.is_valid():
+      serializer.save()
 
-  if serializer.is_valid():
-    serializer.save()
+    return Response(serializer.data)
 
-  return Response(serializer.data)
+  @api_view(['PUT', 'PATCH'])
+  def update(request, id):
+    movie = Movie.objects.get(id = id)
+    serializer = MovieSerializer(instance = movie, data = request.data)
 
-@api_view(['PUT'])
-def movieUpdate(request, id):
-  movie = Movie.objects.get(id = id)
-  serializer = MovieSerializer(instance = movie, data = request.data)
+    if serializer.is_valid():
+      serializer.save()
 
-  if serializer.is_valid():
-    serializer.save()
+    return Response(serializer.data)
 
-  return Response(serializer.data)
+  @api_view(['DELETE'])
+  def destroy(request, id):
+    movie = Movie.objects.get(id = id).delete()
 
-@api_view(['DELETE'])
-def movieDelete(request, id):
-  movie = Movie.objects.get(id = id).delete()
-
-  return Response('Deleted')
+    return Response('Deleted')
 
 # ---------------------- Genres ---------------------
+class GenresAPIView(APIView):
+  @api_view(['GET'])
+  def index(request):
+    genres = Genre.objects.all()
+    serializer = GenreSerializer(genres, many = True)
+    
+    return Response(serializer.data)
 
-@api_view(['GET'])
-def genresList(request):
-  genres = Genre.objects.all()
-  serializer = GenreSerializer(genres, many = True)
-  
-  return Response(serializer.data)
+  @api_view(['GET'])
+  def show(request, id):
+    genre = Genre.objects.get(id = id)
+    serializer = GenreSerializer(genre, many=False)
 
-@api_view(['GET'])
-def genreDetail(request, id):
-  genre = Genre.objects.get(id = id)
-  serializer = GenreSerializer(genre, many=False)
+    return Response(serializer.data)
 
-  return Response(serializer.data)
+  @api_view(['POST'])
+  def create(request):
+    serializer = GenreSerializer(data = request.data)
 
-@api_view(['POST'])
-def createGenre(request):
-  serializer = GenreSerializer(data = request.data)
+    if serializer.is_valid():
+      serializer.save()
 
-  if serializer.is_valid():
-    serializer.save()
+    return Response(serializer.data)
 
-  return Response(serializer.data)
+  @api_view(['PUT', 'PATCH'])
+  def update(request, id):
+    genre = Genre.objects.get(id = id)
+    serializer = GenreSerializer(instance = genre, data = request.data)
 
-@api_view(['PUT'])
-def updateGenre(request, id):
-  genre = Genre.objects.get(id = id)
-  serializer = GenreSerializer(instance = genre, data = request.data)
+    if serializer.is_valid():
+      serializer.save()
 
-  if serializer.is_valid():
-    serializer.save()
+    return Response(serializer.data)
 
-  return Response(serializer.data)
+  @api_view(['DELETE'])
+  def destroy(request, id):
+    genre = Genre.objects.get(id = id).delete()
 
-@api_view(['DELETE'])
-def deleteGenre(request, id):
-  genre = Genre.objects.get(id = id).delete()
+    return Response(genre)
 
-  return Response(genre)
+# -------------------------AUTH-----------------
+class RegistrationAPIView(APIView):
+    """
+    Registers a new user.
+    """
+    permission_classes = [AllowAny]
+    serializer_class = RegistrationSerializer
+
+    def post(self, request):
+        """
+        Creates a new User object.
+        Username, email, and password are required.
+        Returns a JSON web token.
+        """
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(
+            {
+                'token': serializer.data.get('token', None),
+            },
+            status=status.HTTP_201_CREATED,
+        )
+
+class LoginAPIView(APIView):
+  """
+  Logs in an existing user.
+  """
+  permission_classes = [AllowAny]
+  serializer_class = LoginSerializer
+
+  def post(self, request):
+      """
+      Checks is user exists.
+      Email and password are required.
+      Returns a JSON web token.
+      """
+      serializer = self.serializer_class(data=request.data)
+      serializer.is_valid(raise_exception=True)
+
+      return Response(serializer.data, status=status.HTTP_200_OK)
