@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from .models import *
+from django.contrib.auth import authenticate
 
 class MovieSerializer(serializers.ModelSerializer):
   video = serializers.SerializerMethodField()
@@ -113,5 +114,27 @@ class MovieRatingSerializer(serializers.ModelSerializer):
     return data
   class Meta:
     model = MovieRating
+    fields = '__all__'
+    validators = []
+
+class CommentSerializer(serializers.ModelSerializer):
+
+  def validate(self, data):
+    movie = data.get('movie', None)
+    content = data.get('content', None)
+
+    if movie is None:
+        raise serializers.ValidationError(
+            'Movie id is required.'
+        )
+
+    if content is None:
+        raise serializers.ValidationError(
+            'A content is required.'
+        )
+
+    return data
+  class Meta:
+    model = Comment
     fields = '__all__'
     validators = []

@@ -12,6 +12,7 @@ from django.contrib.auth.models import AbstractBaseUser
 from django.contrib.auth.models import PermissionsMixin
 from django.utils import timezone
 from .managers import UserManager
+from django.utils.text import Truncator
 # Create your models here.
 
 class Movie(models.Model):
@@ -31,6 +32,22 @@ class Genre(models.Model):
 
   def __str__(self):
       return self.name
+
+class Comment(models.Model):
+  content = models.TextField()
+  user = models.ForeignKey('User', on_delete=models.CASCADE, related_name='comments')
+  movie = models.ForeignKey(Movie, on_delete=models.CASCADE, related_name='comments')
+  created_at = models.DateTimeField(auto_now_add=True)
+  updated_at = models.DateTimeField(auto_now=True)
+
+  def __str__(self):
+      truncated_content = Truncator(self.content).chars('8')
+      try:
+        movie_title = self.movie.title
+      except AttributeError:
+        movie_title = ''
+
+      return f'{movie_title} | {truncated_content}'
 
 class MovieRating(models.Model):
     movie = models.ForeignKey(Movie, null=True, on_delete=models.SET_NULL)

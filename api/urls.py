@@ -18,12 +18,17 @@ urlpatterns = [
   path("genres/new/", GenresAPIView.create, name="create-genre"),
   path("genres/<str:id>/edit/", GenresAPIView.update, name="update-genre"),
   path("genres/<str:id>/delete/", GenresAPIView.destroy, name="delete-genre"),
-
+  
   path("movie_ratings/", MovieRatingsAPIView.index, name="movie_ratings"),
   path("movie_ratings/<str:id>/",MovieRatingsAPIView.show, name="movie_rating-detail"),
   path("movie_ratings/new",MovieRatingsAPIView.create, name="create-movie_rating"),
   path("movie_ratings/<str:id>/edit",MovieRatingsAPIView.update, name="update-movie_rating"),
   path("movie_ratings/<str:id>/delete",MovieRatingsAPIView.destroy, name="delete-movie_rating"),
+
+  path("movies/<str:movie_id>/comments/", CommentsAPIView.index, name="comments"),
+  path("comments/new/", CommentsAPIView.create, name="create-comment"),
+  path("comments/<str:id>/edit/", CommentsAPIView.update, name="update-comment"),
+  path("comments/<str:id>/delete/", CommentsAPIView.destroy, name="delete-comment"),
 
   path("users/<str:id>/", UsersAPIView.show, name="user-detail"),
 

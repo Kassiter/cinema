@@ -147,8 +147,46 @@ class MovieRatingsAPIView(APIView):
   def destroy(request, id):
     movie_rating = MovieRating.objects.get(id = id).delete()
 
-    return Response(genre)
+    return Response(movie_rating)
 
+# -------------------------Comments-------------
+
+class CommentsAPIView(APIView):
+  # permission_classes = [AllowAny]
+
+  @api_view(['GET'])
+  def index(request, movie_id):
+    comments = Movie.objects.filter(id=movie_id).last().comments
+    serializer = CommentSerializer(comments, many = True)
+    
+    return Response(serializer.data)
+
+  @api_view(['POST'])
+  def create(request):
+    request.data['user'] = request.user.id
+    serializer = CommentSerializer(data = request.data)
+
+    if serializer.is_valid(raise_exception=True):
+      serializer.save()
+
+    return Response(serializer.data)
+
+  @api_view(['PUT', 'PATCH'])
+  def update(request, id): # TODO: Add updating policy for non-owners
+    comment = Comment.objects.get(id = id)
+    request.data['user_id'] = request.user.id
+    serializer = CommentSerializer(instance = comment, data = request.data)
+
+    if serializer.is_valid():
+      serializer.save()
+
+    return Response(serializer.data)
+
+  @api_view(['DELETE'])
+  def destroy(request, id):
+    comment = Comment.objects.get(id = id).delete()
+
+    return Response(comment)
 
 # -------------------------AUTH-----------------
 class RegistrationAPIView(APIView):
