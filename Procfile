@@ -1,1 +1,1 @@
-web: gunicorn westerholt-cinema.wsgi --log-file -
+web: gunicorn cinema.wsgi --log-file -
