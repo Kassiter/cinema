@@ -1,0 +1,32 @@
+[
+  {
+    "model": "api.genre",
+    "fields": {
+      "name": "Action"
+    }
+  },
+  {
+    "model": "api.genre",
+    "fields": {
+      "name": "Drama"
+    }
+  },
+  {
+    "model": "api.genre",
+    "fields": {
+      "name": "Comedy"
+    }
+  },
+  {
+    "model": "api.genre",
+    "fields": {
+      "name": "Adventure"
+    }
+  },
+  {
+    "model": "api.genre",
+    "fields": {
+      "name": "Horror"
+    }
+  }
+]

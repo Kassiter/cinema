@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Movie, Genre, User
+from .models import *
 
 class MovieSerializer(serializers.ModelSerializer):
   video = serializers.SerializerMethodField()
@@ -86,3 +86,32 @@ class LoginSerializer(serializers.Serializer):
         return {
             'token': user.token,
         }
+
+class MovieRatingSerializer(serializers.ModelSerializer):
+
+  def validate(self, data):
+    movie = data.get('movie', None)
+    user = data.get('user', None)
+    rating = data.get('rating', None)
+    existing_rating = MovieRating.objects.filter(movie_id=movie, user_id=user).first()
+
+    if movie is None:
+        raise serializers.ValidationError(
+            'Movie id is required.'
+        )
+
+    if rating is None:
+        raise serializers.ValidationError(
+            'A rating is required.'
+        )
+    
+    if existing_rating:
+        raise serializers.ValidationError(
+            'Such rating already exists.'
+        )
+
+    return data
+  class Meta:
+    model = MovieRating
+    fields = '__all__'
+    validators = []

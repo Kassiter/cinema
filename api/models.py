@@ -10,26 +10,39 @@ from django.db import models
 from django.core import validators
 from django.contrib.auth.models import AbstractBaseUser
 from django.contrib.auth.models import PermissionsMixin
+from django.utils import timezone
 from .managers import UserManager
 # Create your models here.
 
 class Movie(models.Model):
-  title = models.CharField(max_length=200)
-  # release_date = models.DateField(auto_now=False, auto_now_add=False)
+  title = models.CharField(max_length=200, unique=True)
   video = models.FileField(null=True, verbose_name="")
   cover = models.ImageField(default='default.png', blank=True)
-  rating = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(5)], default=0)
   genres = models.ManyToManyField('Genre')
+  description = models.TextField(default='Description is empty')
+  release_date = models.DateField(auto_now=False, auto_now_add=False, default=timezone.now())
 
   def __str__(self):
       return self.title
 
 class Genre(models.Model):
-  name = models.CharField(max_length=50)
-  movies = models.ManyToManyField(Movie)
+  name = models.CharField(max_length=50, unique=True)
+  movies = models.ManyToManyField(Movie, blank=True)
 
   def __str__(self):
       return self.name
+
+class MovieRating(models.Model):
+    movie = models.ForeignKey(Movie, null=True, on_delete=models.SET_NULL)
+    user = models.ForeignKey('User', null=True, on_delete=models.SET_NULL)
+    rating = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(5)], default=0)
+
+    def __str__(self):
+      try:
+        username = self.user.username
+      except AttributeError:
+        username = ''
+      return f'{self.movie.title} - {username}'
 
 class User(AbstractBaseUser, PermissionsMixin):
     username = models.CharField(db_index=True, max_length=255, unique=True)

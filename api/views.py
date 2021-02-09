@@ -3,8 +3,8 @@ from rest_framework import status
 from django.http import JsonResponse
 from rest_framework.decorators import api_view, APIView, authentication_classes, permission_classes
 from rest_framework.response import Response
-from rest_framework.permissions import AllowAny
-from .serializers import MovieSerializer, GenreSerializer, RegistrationSerializer, LoginSerializer, UserSerializer
+from rest_framework.permissions import IsAuthenticatedOrReadOnly, AllowAny
+from .serializers import *
 from .models import Movie, Genre, User
 
 @api_view(['GET'])
@@ -104,6 +104,51 @@ class GenresAPIView(APIView):
     genre = Genre.objects.get(id = id).delete()
 
     return Response(genre)
+
+# ---------------------- Movie Ratings ---------------------
+class MovieRatingsAPIView(APIView):
+  # permission_classes = [AllowAny]
+
+  @api_view(['GET'])
+  def index(request):
+    movie_ratings = MovieRating.objects.all()
+    serializer = MovieRatingSerializer(movie_ratings, many = True)
+    
+    return Response(serializer.data)
+
+  @api_view(['GET'])
+  def show(request, id):
+    movie_rating = MovieRating.objects.get(id = id)
+    serializer = MovieRatingSerializer(movie_rating, many=False)
+
+    return Response(serializer.data)
+
+  @api_view(['POST'])
+  def create(request):
+    request.data['user'] = request.user.id
+    serializer = MovieRatingSerializer(data = request.data)
+
+    if serializer.is_valid(raise_exception=True):
+      serializer.save()
+
+    return Response(serializer.data)
+
+  @api_view(['PUT', 'PATCH'])
+  def update(request, id):
+    movie_rating = MovieRating.objects.get(id = id)
+    serializer = MovieRatingSerializer(instance = movie_rating, data = request.data)
+
+    if serializer.is_valid():
+      serializer.save()
+
+    return Response(serializer.data)
+
+  @api_view(['DELETE'])
+  def destroy(request, id):
+    movie_rating = MovieRating.objects.get(id = id).delete()
+
+    return Response(genre)
+
 
 # -------------------------AUTH-----------------
 class RegistrationAPIView(APIView):
