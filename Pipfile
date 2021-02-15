@@ -19,6 +19,7 @@ django-filter = "*"
 django-extensions = "*"
 jwt = "*"
 pillow = "*"
+python-dotenv = "*"
 
 [dev-packages]
 
