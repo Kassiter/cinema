@@ -1,12 +1,17 @@
 from rest_framework import serializers
 from .models import *
 from django.contrib.auth import authenticate
+import os
 
 class MovieSerializer(serializers.ModelSerializer):
   video = serializers.SerializerMethodField()
+  cover = serializers.SerializerMethodField()
 
   def get_video(self, obj):
-    return f'localhost:8000{obj.video.url}'
+    return f'{os.getenv("APP_HOST")}{obj.video.url}'
+
+  def get_cover(self, obj):
+    return f'{os.getenv("APP_HOST")}{obj.cover.url}'
 
   class Meta:
     model = Movie
@@ -18,6 +23,10 @@ class GenreSerializer(serializers.ModelSerializer):
     fields = '__all__'
 
 class UserSerializer(serializers.ModelSerializer):
+  avatar = serializers.SerializerMethodField()
+
+  def get_avatar(self, obj):
+    return f'{os.getenv("APP_HOST")}{obj.avatar.url}'
   class Meta:
     model = User
     exclude = ('password', )

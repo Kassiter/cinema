@@ -17,8 +17,8 @@ from django.utils.text import Truncator
 
 class Movie(models.Model):
   title = models.CharField(max_length=200, unique=True)
-  video = models.FileField(null=True, verbose_name="")
-  cover = models.ImageField(default='default.png', blank=True)
+  video = models.FileField(null=True, verbose_name="", upload_to='movies/videos')
+  cover = models.ImageField(default='default.png', blank=True, upload_to='movies/covers')
   genres = models.ManyToManyField('Genre')
   description = models.TextField(default='Description is empty')
   release_date = models.DateField(auto_now=False, auto_now_add=False, default=timezone.now())
@@ -62,6 +62,7 @@ class MovieRating(models.Model):
       return f'{self.movie.title} - {username}'
 
 class User(AbstractBaseUser, PermissionsMixin):
+    avatar = models.ImageField(default='default.png', blank=True, upload_to='user_avatars')
     username = models.CharField(db_index=True, max_length=255, unique=True)
 
     email = models.EmailField(
