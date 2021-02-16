@@ -95,7 +95,9 @@ REST_FRAMEWORK = {
         ),
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'api.auth.JWTAuthentication',
-        )
+        ),
+    'DEFAULT_AUTHENTICATION_CLASSES': [],
+    'DEFAULT_PERMISSION_CLASSES': []
 }
 
 WSGI_APPLICATION = 'cinema.wsgi.application'
