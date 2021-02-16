@@ -16,10 +16,10 @@ djangorestframework = "*"
 markdown = "*"
 django-filter = "*"
 django-extensions = "*"
-jwt = "*"
 pillow = "*"
 python-dotenv = "*"
 psycopg2-binary = "*"
+pyjwt = "*"
 
 [dev-packages]
 
